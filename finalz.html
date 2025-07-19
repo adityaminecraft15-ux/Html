@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>IMDb Search & Player</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #121212;
+      color: #fff;
+      text-align: center;
+      padding: 50px 20px;
+    }
+
+    input, select, button {
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 6px;
+      border: none;
+      outline: none;
+      margin: 5px;
+    }
+
+    input, select {
+      width: 200px;
+    }
+
+    button {
+      background-color: #00b894;
+      color: white;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    button:hover {
+      background-color: #019875;
+    }
+
+    #result {
+      margin-top: 20px;
+      font-size: 18px;
+    }
+
+    #player {
+      margin-top: 30px;
+      width: 90vw;
+      height: 80vh;
+      display: none;
+      border: none;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0,255,180,0.3);
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🎬 IMDb Search & Player</h1>
+
+  <input type="text" id="movieName" placeholder="Enter name..." />
+  <select id="typeSelect">
+    <option value="movie">Movie</option>
+    <option value="series">Series</option>
+  </select>
+  <button onclick="searchMedia()">Search & Play</button>
+
+  <div id="result"></div>
+
+  <iframe id="player" allowfullscreen></iframe>
+
+  <script>
+    async function searchMedia() {
+      const name = document.getElementById("movieName").value.trim();
+      const type = document.getElementById("typeSelect").value;
+      const resultDiv = document.getElementById("result");
+      const player = document.getElementById("player");
+
+      if (!name) {
+        resultDiv.innerHTML = "Please enter a title.";
+        player.style.display = "none";
+        return;
+      }
+
+      const apiKey = "c2e53bd7"; // your OMDb API key
+      const url = `https://www.omdbapi.com/?apikey=${apiKey}&t=${encodeURIComponent(name)}&type=${type}`;
+
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (data.Response === "True") {
+          resultDiv.innerHTML = `
+            <strong>Title:</strong> ${data.Title}<br/>
+            <strong>IMDb ID:</strong> ${data.imdbID}<br/>
+            <strong>Year:</strong> ${data.Year}<br/>
+            <strong>Type:</strong> ${data.Type}
+          `;
+
+          const imdbID = data.imdbID;
+          const embedURL = type === "movie"
+            ? `https://vidsrc.to/embed/movie/${imdbID}`
+            : `https://vidsrc.to/embed/tv/${imdbID}`;
+
+          player.src = embedURL;
+          player.style.display = 'block';
+        } else {
+          resultDiv.innerHTML = "Title not found!";
+          player.style.display = "none";
+        }
+      } catch (error) {
+        resultDiv.innerHTML = "Error fetching data. Please try again.";
+        player.style.display = "none";
+      }
+    }
+  </script>
+
+</body>
+</html>
