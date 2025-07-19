@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>IMDb Movie Search & Player</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #121212;
+      color: #fff;
+      text-align: center;
+      padding: 50px 20px;
+    }
+
+    input, button {
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 6px;
+      border: none;
+      outline: none;
+      margin: 5px;
+    }
+
+    input {
+      width: 250px;
+    }
+
+    button {
+      background-color: #00b894;
+      color: white;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    button:hover {
+      background-color: #019875;
+    }
+
+    #result {
+      margin-top: 20px;
+      font-size: 18px;
+    }
+
+    #player {
+      margin-top: 30px;
+      width: 90vw;
+      height: 80vh;
+      display: none;
+      border: none;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0,255,180,0.3);
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🎬 IMDb Movie Search & Player</h1>
+
+  <input type="text" id="movieName" placeholder="Enter movie name..." />
+  <button onclick="searchMovie()">Search & Play</button>
+
+  <div id="result"></div>
+
+  <iframe id="player" allowfullscreen></iframe>
+
+  <script>
+    async function searchMovie() {
+      const name = document.getElementById("movieName").value.trim();
+      const resultDiv = document.getElementById("result");
+      const player = document.getElementById("player");
+
+      if (!name) {
+        resultDiv.innerHTML = "Please enter a movie name.";
+        player.style.display = "none";
+        return;
+      }
+
+      const apiKey = "c2e53bd7"; // Your OMDb API Key
+      const url = `https://www.omdbapi.com/?apikey=${apiKey}&t=${encodeURIComponent(name)}`;
+
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (data.Response === "True") {
+          resultDiv.innerHTML = `
+            <strong>Title:</strong> ${data.Title}<br/>
+            <strong>IMDb ID:</strong> ${data.imdbID}<br/>
+            <strong>Year:</strong> ${data.Year}<br/>
+            <strong>Type:</strong> ${data.Type}
+          `;
+
+          const imdbID = data.imdbID;
+          const embedURL = `https://vidsrc.to/embed/movie/${imdbID}`;
+          player.src = embedURL;
+          player.style.display = 'block';
+        } else {
+          resultDiv.innerHTML = "Movie not found!";
+          player.style.display = "none";
+        }
+      } catch (error) {
+        resultDiv.innerHTML = "Error fetching data. Please try again.";
+        player.style.display = "none";
+      }
+    }
+  </script>
+
+</body>
+</html>
